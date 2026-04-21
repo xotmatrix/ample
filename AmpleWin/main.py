@@ -1180,10 +1180,6 @@ class AmpleMainWindow(QMainWindow):
         self.refresh_ui()
 
     def refresh_ui(self):
-        # 0. Re-initialize defaults for any newly appeared slots/devices
-        if self.current_machine_data:
-            self.initialize_default_slots(self.current_machine_data)
-
         # 1. Clean the fixed layouts without destroying the frames themselves
         self.clear_grid(self.slots_layout)
         self.clear_grid(self.media_layout)
@@ -1304,8 +1300,12 @@ class AmpleMainWindow(QMainWindow):
         for opt in slot['options']:
             opt_desc = opt.get('description') or opt['value'] or "—None—"
             item = QStandardItem(opt_desc)
-            item.setData(opt['value'], Qt.UserRole)
-            
+            if opt.get('default') == "false" or opt.get('default') is False:
+                item.setData("''", Qt.UserRole)  # Explicitly set empty string to override default
+            else:
+                item.setData(opt['value'], Qt.UserRole)
+
+
             # Check for disabled status in plist
             # XML plist boolean is usually True/False in Python after loading
             is_disabled = opt.get('disabled', False)
